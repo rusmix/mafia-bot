@@ -49,10 +49,10 @@ async function runApp() {
 
   // Setup bot command
   await bot.api.setMyCommands([
-    {
-      command: 'start',
-      description: 'Запустить бота',
-    },
+    // {
+    //   command: 'start',
+    //   description: 'Запустить бота',
+    // },
     { command: 'afisha', description: 'Посмотреть мероприятия' },
     { command: 'profile', description: 'Посмотреть свой профиль' },
   ])

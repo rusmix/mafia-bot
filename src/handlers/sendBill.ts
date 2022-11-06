@@ -31,7 +31,7 @@ export default async function sendBill(ctx: Context) {
     ctx.session.userId
   }-${new Date().getHours()}:${new Date().getMinutes()}`
 
-  const lifetime = qiwiApi.getLifetimeByDay(0.1)
+  const lifetime = qiwiApi.getLifetimeByDay(2)
   ctx.session.billId = billId
 
   console.log(billId)
@@ -46,8 +46,10 @@ export default async function sendBill(ctx: Context) {
   qiwiApi.createBill(billId, fields).then(async (data) => {
     console.log(data)
     return await ctx.reply(
-      'Места забронированы, оплатите в течение 20 минут. В случае неуплаты бронь отменяется.',
-      { reply_markup: payKeyboard(data.payUrl as string) }
+      'Места забронированы! При оплате через бота, Вам начисляются бонусные баллы! Ссылка активна в течение 2 дней.',
+      {
+        reply_markup: payKeyboard(data.payUrl as string),
+      }
     )
   })
   //БРОНЬ
@@ -74,28 +76,27 @@ export default async function sendBill(ctx: Context) {
           await user.save()
           delete ctx.session.billId
         }
-        if (+new Date() - startTime > 20 * 60 * 1000) {
-          //тут должно быть20 минут:  20 * 60 * 1000
+        if (+new Date() - startTime > 2 * 24 * 60 * 60 * 1000) {
           clearInterval(checkBill)
-          await ctx.reply(
-            'Вы не успели оплатить счёт! Попробуйте забронировать ещё раз.'
-          )
-          qiwiApi.cancelBill(billId).then((data) => {
-            //do with data
-          })
+          //   await ctx.reply(
+          //     'Вы не успели оплатить счёт! Попробуйте забронировать ещё раз.'
+          //   )
+          //   qiwiApi.cancelBill(billId).then((data) => {
+          //     //do with data
+          //   })
 
-          event.players = event.players.filter((el) => el.user != user)
-          event.amountOfPlayers -= ctx.session.currentAmountOfPeople
-          await event.save()
+          //   event.players = event.players.filter((el) => el.user != user)
+          //   event.amountOfPlayers -= ctx.session.currentAmountOfPeople
+          //   await event.save()
 
-          ctx.session.currentBonuses = 0
-          ctx.session.currentAmountOfPeople = 0
-          delete ctx.session.currentTitle
-          delete ctx.session.billId
+          //   ctx.session.currentBonuses = 0
+          //   ctx.session.currentAmountOfPeople = 0
+          //   delete ctx.session.currentTitle
+          //   delete ctx.session.billId
         }
       })
     },
-    30 * 1000,
+    60 * 1000,
     billId
   )
 }
