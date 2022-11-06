@@ -1,4 +1,5 @@
 import { phoneKeyboard } from '@/helpers/keyboards'
+import verifyPhoto from '@/helpers/verifyPhoto'
 import { adminState, userState } from '@/middlewares/session'
 import Context from '@/models/Context'
 import { UserModel } from '@/models/User'
@@ -41,11 +42,11 @@ export default async function registration(ctx: Context) {
       break
     case userState.sendPhoto:
       // eslint-disable-next-line no-case-declarations
-      const doc = ctx.message?.document
-        ? ctx.message.document.file_id
-        : ctx.message.photo.slice(-1)[0].file_id
-      console.log(doc)
-      user.photoId = doc
+      const photo = verifyPhoto(ctx)
+      console.log(photo)
+      if (!photo)
+        return await ctx.reply('Отправьте фото в виде фото, а не документа')
+      user.photoId = photo
       await user.save()
       ctx.session.state = userState.default
       await ctx.reply(

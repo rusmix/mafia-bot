@@ -11,9 +11,8 @@ export default async function attachUser(ctx: Context, next: NextFunction) {
     await ctx.dbuser.save()
   }
 
-  if (!ctx.dbuser?.usernameTg && !ctx.from?.username) {
-    ctx.dbuser.usernameTg = 'unknown'
-    await ctx.dbuser.save()
-  }
+  // if (!ctx.dbuser?.usernameTg && !ctx.from?.username) {
+    // await ctx.dbuser.save()
+  // }
   return next()
 }

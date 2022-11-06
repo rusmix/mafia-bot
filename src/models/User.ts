@@ -7,7 +7,7 @@ import {
 } from '@typegoose/typegoose'
 import { FindOrCreate } from '@typegoose/typegoose/lib/defaultClasses'
 
-class Stats {
+interface Stats {
   gamesTotal: number
   pointsTotal: number
 }
@@ -35,10 +35,10 @@ export class User extends FindOrCreate {
   @prop({ required: true, default: 'ru' })
   language: string
 
-  @prop({})
+  @prop({ default: { gamesTotal: 0, pointsTotal: 0 } })
   thisMonthStats: Stats
 
-  @prop({})
+  @prop({ default: { gamesTotal: 0, pointsTotal: 0 } })
   thisYearStats: Stats
 
   @prop({})

@@ -1,11 +1,21 @@
 import getTitles from '@/helpers/getTitles'
-import { eventsKeyboard, navigationKeyboard, oneEventKeyboard } from '@/helpers/keyboards'
+import {
+  eventsKeyboard,
+  navigationKeyboard,
+  oneEventKeyboard,
+} from '@/helpers/keyboards'
 import Context from '@/models/Context'
 import { EventModel } from '@/models/Event'
 
-export default async function eventButtonHandler(ctx: Context) {
+export default async function oneEventHandler(ctx: Context) {
+  const event1 = await EventModel.find({ isActual: true })
+
+  if (event1.length === 1 && (ctx.match === 'left' || ctx.match === 'right'))
+    return await ctx.answerCallbackQuery()
+
   const titles = await getTitles()
   let title = String(ctx.match)
+
   if (ctx.match != 'left' && ctx.match != 'right')
     ctx.session.currentTitle = ctx.match as string
 

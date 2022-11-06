@@ -26,7 +26,10 @@ export class Event extends FindOrCreate {
   photoId: string
 
   @prop({})
-  players: User[]
+  players: { user: User; guests: number }[]
+
+  @prop({ default: 0 })
+  amountOfPlayers: number
 
   @prop({})
   date: Date
@@ -34,13 +37,31 @@ export class Event extends FindOrCreate {
   @prop({})
   maxPlayers: number
 
-  @prop({ index: true, default: true })
+  @prop({ index: true, default: false })
   isActual: boolean
-  //   public static async doSomething(this: DocumentType<User>, id: number) {
-  //     this.id = id
-  //     await this.save()
-  //   }
+
+  public static async getActualEvents(): Promise<DocumentType<Event>[]> {
+    // const events = (await EventModel.find({ isActual: true })).filter(
+    //   (potentialEvent) =>
+    //     !Object.keys(testEvent).some((key) => potentialEvent[key] === undefined)
+    // )
+    const events = await EventModel.find({ isActual: true })
+    return events
+  }
 }
+
+const testEvent = new Event()
+testEvent.title = 'test'
+testEvent.description = 'test'
+testEvent.place = 'test'
+testEvent.price = 1
+testEvent.photoId = 'test'
+testEvent.players = []
+testEvent.amountOfPlayers = 0
+testEvent.date = new Date()
+testEvent.maxPlayers = 0
+testEvent.isActual = false
+export default testEvent
 
 export const EventModel = getModelForClass(Event, {
   schemaOptions: { timestamps: true },

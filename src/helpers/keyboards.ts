@@ -21,33 +21,32 @@ export const adminKeyboard = new InlineKeyboard().text(
 
 export const numbers = ['1', '2', '3', '4', '5', '6']
 
-export const numbersKeyboard = new InlineKeyboard()
-  .text('Я один', '1')
-  .text('+ 1', '2')
-  .text('+ 2', '3')
-  .row()
-  .text('+ 3', '4')
-  .text('+ 4', '5')
-  .text('+ 5', '6')
+export const numbersKeyboard = (amount: number) => {
+  let keyboard = new InlineKeyboard().text('Я один', '1')
+  if (amount < 6) {
+    for (let i = 2; i <= amount; i++) {
+      keyboard = keyboard.text(`+ ${i - 1}`, `${i}`)
+    }
+    return keyboard
+  }
+  return keyboard
+    .text('+ 1', '2')
+    .text('+ 2', '3')
+    .row()
+    .text('+ 3', '4')
+    .text('+ 4', '5')
+    .text('+ 5', '6')
+}
 
 export const eventsKeyboard = async () => {
-  let res = await EventModel.find({ isActual: true }) // title date (day of week) place
+  // let res = await EventModel.find({ isActual: true }) // title date (day of week) place
+
+  const res = await EventModel.getActualEvents()
 
   console.log(
     res,
     '\n_________________________________\n_________________________________\n'
   )
-
-  await Promise.all(
-    res.map(async (el) => {
-      if (+new Date() - +new Date(el.date) > 0) {
-        el.isActual = false
-        await el.save()
-      }
-    })
-  )
-
-  res = await EventModel.find({ isActual: true })
   console.log(res)
   let keyboard = new InlineKeyboard()
 
@@ -74,15 +73,45 @@ export const eventsKeyboard = async () => {
 }
 
 export const oneEventKeyboard = (event: DocumentType<Event>) => {
-  const amount = event.players.length
+  const amount = event.amountOfPlayers
   const maxAmount = event.maxPlayers
-  const keyboard = new InlineKeyboard()
+  let keyboard = new InlineKeyboard()
     .text('◀️', 'left')
     .text('▶️', 'right')
     .row()
     .text(`Игроки (${amount}/${maxAmount})`, 'showPlayers')
-    .row()
-    .text(`Записаться`, 'register')
+  if (amount < maxAmount)
+    keyboard = keyboard.row().text(`Записаться`, 'register')
+  return keyboard
+}
+
+export const oneEventAdminKeyboard = new InlineKeyboard()
+  .text('◀️', 'left')
+  .text('▶️', 'right')
+  .row()
+  .text('Удалить событие', 'deleteEvent')
+  .row()
+  .text('Редактировать событие', 'editEvent')
+  .row()
+  .text('Игроки', 'showPlayers')
+
+export const yesOrNoKeyboard = new InlineKeyboard()
+  .text('ДА', 'yes')
+  .text('НЕТ', 'no')
+
+export const editEventKeyboard = new InlineKeyboard()
+  .text('Поменять заголовок', 'changeTitle')
+  .row()
+  .text('Поменять место', 'changePlace')
+  .row()
+  .text('Поменять дату', 'changeDate')
+  .row()
+  .text('Поменять описание', 'changeDescription')
+  .row()
+  .text('Поменять фотографию', 'changePhoto')
+
+export const payKeyboard = (url: string) => {
+  const keyboard = new InlineKeyboard().url('Оплата QIWI', url)
   return keyboard
 }
 

@@ -6,6 +6,9 @@ export function getSessionKey(ctx: Context) {
   if (ctx.update?.pre_checkout_query)
     // это для ботовой оплаты
     return ctx.update.pre_checkout_query.from.id.toString()
+  if (ctx.update?.message.successful_payment)
+    // это для ботовой оплаты тоже
+    return ctx.update.message.from.id.toString()
 }
 
 const sequentialize = baseSequentialize(getSessionKey)

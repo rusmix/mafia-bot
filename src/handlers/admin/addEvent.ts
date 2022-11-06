@@ -1,7 +1,9 @@
-import setCallback from '@/helpers/setCallbackAfisha'
+import { EventModel } from '@/models/Event'
 import { adminState } from '@/middlewares/session'
 import Context from '@/models/Context'
-import { EventModel } from '@/models/Event'
+import formatDate from '@/helpers/formatDate'
+import setCallback from '@/helpers/setCallbackAfisha'
+import verifyPhoto from '@/helpers/verifyPhoto'
 
 export default async function addEvent(ctx: Context) {
   let res = undefined
@@ -29,19 +31,11 @@ export default async function addEvent(ctx: Context) {
       )
         return await ctx.reply('Введите корректное значение!')
       // eslint-disable-next-line no-case-declarations
-      const formattedDate =
-        text.split('-').slice(0, 3).join('-') +
-        'T' +
-        text.split('-').slice(3, 5).join(':') +
-        ':00.000+00:00'
+      const formattedDate = formatDate(text)
 
-      console.log(formattedDate)
-
-      if (!+new Date(formattedDate))
-        return await ctx.reply('Такой даты не существует!')
-      console.log('дата норм, идём дальше')
+      if (!formattedDate) return await ctx.reply('Такой даты не существует!')
       res = await EventModel.findOne({ title: ctx.session.admin.eventTitle })
-      res.date = new Date(Date.parse(formattedDate))
+      res.date = formattedDate
       console.log(res.date)
       await res.save()
       ctx.session.admin.state = adminState.insertDescription
@@ -49,6 +43,7 @@ export default async function addEvent(ctx: Context) {
         'Теперь описание мероприятия (не забудьте включить сюда полный адрес, всю важную информацию, стоимость посещения вводится отдельно):'
       )
       break
+
     case adminState.insertDescription:
       res = await EventModel.findOne({ title: ctx.session.admin.eventTitle })
       res.description = ctx.message.text
@@ -56,19 +51,21 @@ export default async function addEvent(ctx: Context) {
       ctx.session.admin.state = adminState.insertPhoto
       await ctx.reply('Теперь фотографию:')
       break
+
     case adminState.insertPhoto:
       console.log(ctx.message)
       // eslint-disable-next-line no-case-declarations
-      const doc = ctx.message?.document
-        ? ctx.message.document.file_id
-        : ctx.message.photo.slice(-1)[0].file_id
-      console.log(doc)
+      const photo = verifyPhoto(ctx)
+      console.log(photo)
+      if (!photo)
+        return await ctx.reply('Отправьте фото в виде фото, а не документа')
       res = await EventModel.findOne({ title: ctx.session.admin.eventTitle })
-      res.photoId = doc
+      res.photoId = photo
       await res.save()
       ctx.session.admin.state = adminState.insertPrice
       await ctx.reply('Теперь стоимость с одного человека:')
       break
+
     case adminState.insertPrice:
       res = await EventModel.findOne({ title: ctx.session.admin.eventTitle })
       if (isNaN(ctx.message.text as unknown as number))
@@ -92,6 +89,7 @@ export default async function addEvent(ctx: Context) {
         await ctx.reply('Некорректное значение')
       res = await EventModel.findOne({ title: ctx.session.admin.eventTitle })
       res.maxPlayers = Number(ctx.message.text)
+      res.isActual = true
       await res.save()
       ctx.session.admin.state = adminState.default
       console.log(res)

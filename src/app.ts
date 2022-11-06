@@ -5,37 +5,43 @@ import 'module-alias/register'
 import * as dotenv from 'dotenv'
 dotenv.config({ path: `${__dirname}/../.env` })
 // Dependencies
-import { adminState, SessionData, userState } from '@/middlewares/session'
+import { oneEventHandler as OneAdminEventHandler } from './handlers/admin/OneEventHandler'
 import { UserModel } from '@/models/User'
+import { adminKeyboard, numbers } from './helpers/keyboards'
+import { SessionData, adminState, userState } from '@/middlewares/session'
 import { run } from '@grammyjs/runner'
 import { session } from 'grammy'
 import Context from '@/models/Context'
+import addEvent from './handlers/admin/addEvent'
 import attachUser from '@/middlewares/attachUser'
 import attachUserId from '@/middlewares/attachUserId'
 import bot from '@/helpers/bot'
 import checkSubscribers from './handlers/checkSubsribers'
+import eventButtonHandler from './handlers/OneEventHandler'
+import getAdmin from '@/handlers/admin/getAdmin'
+import getTitles from './helpers/getTitles'
 import ignoreOldMessageUpdates from '@/middlewares/ignoreOldMessageUpdates'
+import registerToEvent from './handlers/registerToEvent'
+import registration from './handlers/registration'
+import sendBill from './handlers/sendBill'
 import sequentialize, { getSessionKey } from '@/middlewares/sequentialize'
+import setCallback from './helpers/setCallbackAfisha'
+import showAfisha from './handlers/showAfisha'
+import showPlayers from './handlers/showPlayers'
+import showProfile from './handlers/showProfile'
 import start from './handlers/start'
 import startMongo from '@/helpers/startMongo'
-import getAdmin from '@/handlers/admin/getAdmin'
-import { adminKeyboard, numbers } from './helpers/keyboards'
-import addEvent from './handlers/admin/addEvent'
-import showAfisha from './handlers/showAfisha'
-import getTitles from './helpers/getTitles'
-import eventButtonHandler from './handlers/eventButtonHandler'
-import setCallback from './helpers/setCallbackAfisha'
-import registration from './handlers/registration'
-import registerToEvent from './handlers/registerToEvent'
 import successfulPayment from './handlers/successfulPayment'
-import sendBill from './handlers/sendBill'
-
+import editEvent, {
+  editEventHandler,
+  editEventMessageHandler,
+} from './handlers/admin/editEvent'
+import deleteEvent from './handlers/admin/deleteEvent'
 async function runApp() {
   console.log('Starting app...')
   // Mongo
   await startMongo()
   console.log('Mongo connected')
-
   // for deleting answers during tests
   // await AnswerModel.deleteMany()
   // await UserModel.deleteMany()
@@ -48,6 +54,7 @@ async function runApp() {
       description: 'Запустить бота',
     },
     { command: 'afisha', description: 'Посмотреть мероприятия' },
+    { command: 'profile', description: 'Посмотреть свой профиль' },
   ])
   console.log('The bot commands are set')
 
@@ -69,9 +76,14 @@ async function runApp() {
   bot.use(attachUser)
   bot.use(attachUserId)
 
+  bot.on(':successful_payment', async (ctx: Context) => {
+    console.log('kook??____')
+    await successfulPayment(ctx)
+  })
   // Commands
   bot.command('start', start)
   bot.command('afisha', showAfisha)
+  bot.command('profile', showProfile)
   bot.command('getadmin22', getAdmin)
   bot.command('admin', async (ctx: Context) => {
     if (ctx.dbuser.isAdmin)
@@ -79,6 +91,8 @@ async function runApp() {
   })
 
   bot.on('message', (ctx: Context) => {
+    if (ctx.dbuser.isAdmin && ctx.session.adminEditing === true)
+      return editEventMessageHandler(ctx)
     if (ctx.dbuser.isAdmin && ctx.session.admin.state !== 'default') {
       return addEvent(ctx)
     }
@@ -100,26 +114,36 @@ async function runApp() {
   bot.callbackQuery('addEvent', addEvent)
 
   bot.callbackQuery('register', registerToEvent)
-  // bot.callbackQuery('showPlayers', showPlayers)
+  bot.callbackQuery('showPlayers', showPlayers)
 
-  bot.callbackQuery(['left', 'right'], eventButtonHandler)
+  bot.callbackQuery(['deleteEvent', 'yes', 'no'], deleteEvent)
+
+  bot.callbackQuery('editEvent', async (ctx: Context) => {
+    if (ctx.dbuser.isAdmin) return await editEvent(ctx)
+  })
+
+  bot.callbackQuery(
+    [
+      'changePlace',
+      'changeDate',
+      'changeDescription',
+      'changePhoto',
+      'changeTitle',
+    ],
+    editEventHandler
+  )
+
+  bot.callbackQuery(['left', 'right'], async (ctx: Context) => {
+    if (ctx.dbuser.isAdmin) {
+      return await OneAdminEventHandler(ctx)
+    }
+    await eventButtonHandler(ctx)
+  })
 
   bot.callbackQuery(numbers, sendBill)
 
   void setCallback()
-  // setInterval(setCallback, 30000)
-  bot.on('pre_checkout_query', async (ctx: Context) => {
-    //  ОПЛАТА ЧЕРЕЗ ТЕЛЕГРАМ ЕСЛИ НУЖНА ВКЛЮЧИТЬ
-    console.log('Происходит оплата...')
-    await ctx.answerPreCheckoutQuery(true)
-  }) // ответ на предварительный запрос по оплате
 
-  bot.on(':successful_payment', async (ctx: Context) => {
-    console.log()
-    await successfulPayment(ctx)
-  })
-
-  // Errors
   bot.catch(console.error)
   // Start bot
   await bot.init()

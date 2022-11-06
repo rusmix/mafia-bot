@@ -4,7 +4,7 @@ import { EventModel } from '@/models/Event'
 
 export default async function registerToEvent(ctx: Context) {
   const event = await EventModel.findOne({ title: ctx.session.currentTitle })
-  const amount = event.players.length
+  const amount = event.amountOfPlayers
   const maxAmount = event.maxPlayers
   await ctx.editMessageMedia(
     {
@@ -14,7 +14,7 @@ export default async function registerToEvent(ctx: Context) {
         maxAmount - amount
       }.\nУкажите, будете ли вы приглашать друзей, если да, то сколько?`,
     },
-    { reply_markup: numbersKeyboard }
+    { reply_markup: numbersKeyboard(maxAmount - amount) }
   )
   // await ctx.
 }
