@@ -18,7 +18,7 @@ export default async function sendBill(ctx: Context) {
     media: `${event.photoId}`,
     caption: `Стоимость с одного человека: ${
       event.price
-    } руб. К оплате ${totalPrice} руб.\n Обратите внимание, что после оплаты нельзя отменить бронь и вернуть деньги.\n\nВам начислятся бонусы в размере ${Math.floor(
+    } руб. \nК оплате ${totalPrice} руб.\n\nВам начислятся бонусы в размере ${Math.floor(
       totalPrice * 0.1
     )} руб.`,
   })
@@ -68,7 +68,8 @@ export default async function sendBill(ctx: Context) {
         if (data.status.value === 'PAID') {
           clearInterval(checkBill)
           await ctx.reply(`Успешно оплачено! Ждём Вас в ${event.place}!`)
-          user.balance = ctx.session.currentBonuses
+          user.balance += ctx.session.currentBonuses
+          user.currentBonuses = ctx.session.currentBonuses
           ctx.session.currentBonuses = 0
           ctx.session.currentAmountOfPeople = 0
           delete ctx.session.currentTitle

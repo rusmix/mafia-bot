@@ -4,11 +4,13 @@ import {
   navigationKeyboard,
   oneEventKeyboard,
 } from '@/helpers/keyboards'
+import { adminState } from '@/middlewares/session'
 import Context from '@/models/Context'
 import { EventModel } from '@/models/Event'
 
 export default async function oneEventHandler(ctx: Context) {
   const event1 = await EventModel.find({ isActual: true })
+  ctx.session.admin.state = adminState.default
 
   if (event1.length === 1 && (ctx.match === 'left' || ctx.match === 'right'))
     return await ctx.answerCallbackQuery()
@@ -57,7 +59,7 @@ export default async function oneEventHandler(ctx: Context) {
         minute: 'numeric',
       })}, в ${event.place}\n\n${event.description}`,
     },
-    { reply_markup: oneEventKeyboard(event) }
+    { reply_markup: oneEventKeyboard(event, ctx) }
   )
   // await ctx.
 }

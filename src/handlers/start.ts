@@ -8,6 +8,8 @@ import showAfisha from './showAfisha'
 
 export default async function start(ctx: Context) {
   const user = ctx.dbuser
+  user.isActive = true
+  await user.save()
   if (!user?.name || !user.phone || !user.photoId) {
     await ctx.reply(
       'Всем привет! Это бот для удобной записи на игру мафия в г. Москва. Напишите, пожалуйста, своё имя:'

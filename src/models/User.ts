@@ -47,14 +47,23 @@ export class User extends FindOrCreate {
   @prop({ default: 0 })
   balance: number
 
+  @prop({ default: 0 })
+  currentBonuses?: number
+
   @prop({})
   phone: string
 
   @prop({})
   photoId: string
 
+  @prop({ index: true, default: false })
+  isSentNewEvent: boolean
+
   @prop({ index: true, required: true, default: false })
   isAdmin: boolean
+
+  @prop({ default: true })
+  isActive: boolean
   //   public static async doSomething(this: DocumentType<User>, id: number) {
   //     this.id = id
   //     await this.save()

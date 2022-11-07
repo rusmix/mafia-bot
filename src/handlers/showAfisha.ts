@@ -22,7 +22,7 @@ export default async function showAfisha(ctx: Context) {
   )
   events = await EventModel.getActualEvents()
 
-  console.log(events)
+  // console.log(events)
   if (events.length === 0)
     return await ctx.reply('На данный момент никаких событий не запланировано!')
 

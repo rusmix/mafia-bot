@@ -26,7 +26,7 @@ export class Event extends FindOrCreate {
   photoId: string
 
   @prop({})
-  players: { user: User; guests: number }[]
+  players: { user: User; guests?: number }[]
 
   @prop({ default: 0 })
   amountOfPlayers: number

@@ -1,6 +1,7 @@
 import { DocumentType } from '@typegoose/typegoose'
 import { Event, EventModel } from '@/models/Event'
 import { InlineKeyboard, Keyboard } from 'grammy'
+import Context from '@/models/Context'
 
 export const phoneKeyboard = new Keyboard().requestContact(
   'Отправить номер телефона'
@@ -43,11 +44,11 @@ export const eventsKeyboard = async () => {
 
   const res = await EventModel.getActualEvents()
 
-  console.log(
-    res,
-    '\n_________________________________\n_________________________________\n'
-  )
-  console.log(res)
+  // console.log(
+  //   res,
+  //   '\n_________________________________\n_________________________________\n'
+  // )
+  // console.log(res)
   let keyboard = new InlineKeyboard()
 
   res.sort(function (a, b) {
@@ -72,16 +73,32 @@ export const eventsKeyboard = async () => {
   return keyboard
 }
 
-export const oneEventKeyboard = (event: DocumentType<Event>) => {
+export const oneEventKeyboard = (event: DocumentType<Event>, ctx: Context) => {
   const amount = event.amountOfPlayers
   const maxAmount = event.maxPlayers
+
   let keyboard = new InlineKeyboard()
     .text('◀️', 'left')
     .text('▶️', 'right')
     .row()
     .text(`Игроки (${amount}/${maxAmount})`, 'showPlayers')
-  if (amount < maxAmount)
+
+  const player = event.players.find((el) => {
+    return el.user.id === ctx.dbuser.id
+  })
+
+  if (amount < maxAmount && !player)
     keyboard = keyboard.row().text(`Записаться`, 'register')
+
+  if (player) {
+    keyboard = keyboard.row().text(`Отменить бронь`, 'unregister')
+
+    if (event.maxPlayers - event.amountOfPlayers > 0)
+      keyboard = keyboard.row().text('Добавить 1 друга', 'addFriend')
+    if (player.guests > 0)
+      keyboard = keyboard.row().text('Удалить 1 друга', 'deleteFriend')
+  }
+
   return keyboard
 }
 

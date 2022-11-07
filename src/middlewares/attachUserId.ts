@@ -8,6 +8,6 @@ export default function attachUserId(ctx: Context, next: NextFunction) {
       // тоже для оплаты
       ctx.session.userId = ctx.update.pre_checkout_query.from.id
   }
-  console.log('attach user Id', ctx)
+  console.log('attach user Id')
   return next()
 }

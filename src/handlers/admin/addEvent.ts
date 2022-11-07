@@ -4,6 +4,7 @@ import Context from '@/models/Context'
 import formatDate from '@/helpers/formatDate'
 import setCallback from '@/helpers/setCallbackAfisha'
 import verifyPhoto from '@/helpers/verifyPhoto'
+import notifyAllUsers from './notifyAllUsers'
 
 export default async function addEvent(ctx: Context) {
   let res = undefined
@@ -94,6 +95,7 @@ export default async function addEvent(ctx: Context) {
       ctx.session.admin.state = adminState.default
       console.log(res)
       await ctx.reply('Успешно добавлено')
+      await notifyAllUsers(ctx)
       void setCallback()
       break
   }

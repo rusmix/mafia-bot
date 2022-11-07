@@ -7,7 +7,7 @@ dotenv.config({ path: `${__dirname}/../.env` })
 // Dependencies
 import { oneEventHandler as OneAdminEventHandler } from './handlers/admin/OneEventHandler'
 import { UserModel } from '@/models/User'
-import { adminKeyboard, numbers } from './helpers/keyboards'
+import { adminKeyboard, numbers, oneEventKeyboard } from './helpers/keyboards'
 import { SessionData, adminState, userState } from '@/middlewares/session'
 import { run } from '@grammyjs/runner'
 import { session } from 'grammy'
@@ -37,6 +37,8 @@ import editEvent, {
   editEventMessageHandler,
 } from './handlers/admin/editEvent'
 import deleteEvent from './handlers/admin/deleteEvent'
+import { EventModel } from './models/Event'
+import cancelEventRegistration from './handlers/cancelEventRegistration'
 async function runApp() {
   console.log('Starting app...')
   // Mongo
@@ -49,15 +51,12 @@ async function runApp() {
 
   // Setup bot command
   await bot.api.setMyCommands([
-    // {
-    //   command: 'start',
-    //   description: 'Запустить бота',
-    // },
     { command: 'afisha', description: 'Посмотреть мероприятия' },
     { command: 'profile', description: 'Посмотреть свой профиль' },
   ])
   console.log('The bot commands are set')
-
+  // await UserModel.updateMany({}, { $set: { isSentNewEvent: false } })
+  // await UserModel.updateMany({}, { $set: { isActive: true } })
   // Middlewares
   bot.use(sequentialize)
   bot.use(
@@ -106,6 +105,16 @@ async function runApp() {
     }
   })
 
+  bot.on('my_chat_member', async (ctx: Context) => {
+    //function on block bot
+    if (ctx.update.my_chat_member?.new_chat_member)
+      if (ctx.update.my_chat_member.new_chat_member.status === 'kicked') {
+        console.log('nigger deactivated')
+        ctx.dbuser.isActive = false
+        await ctx.dbuser.save()
+      }
+  })
+
   // Callbacks
   bot.callbackQuery('help', async (ctx: Context) => {
     await ctx.reply('help')
@@ -115,6 +124,46 @@ async function runApp() {
 
   bot.callbackQuery('register', registerToEvent)
   bot.callbackQuery('showPlayers', showPlayers)
+
+  bot.callbackQuery('unregister', cancelEventRegistration)
+  bot.callbackQuery(['addFriend', 'deleteFriend'], async (ctx: Context) => {
+    const event = await EventModel.findOne({ title: ctx.session.currentTitle })
+    const player = event.players.find((el) => {
+      return el.user.id === ctx.dbuser.id
+    })
+    const index = event.players.findIndex((el) => {
+      return el.user.id === ctx.dbuser.id
+    })
+    let resulted = ''
+    if (ctx.match === 'addFriend') {
+      player.guests += 1
+      event.amountOfPlayers += 1
+      resulted = 'добавлен'
+    }
+    if (ctx.match === 'deleteFriend') {
+      player.guests -= 1
+      event.amountOfPlayers -= 1
+      resulted = 'удалён'
+    }
+    event.players[index] = player
+    await event.save()
+
+    await ctx.editMessageMedia(
+      {
+        type: 'photo',
+        media: `${event.photoId}`,
+        caption: ` ${event.title} \n\n${event.date.toLocaleString('ru', {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+          weekday: 'short',
+          hour: 'numeric',
+          minute: 'numeric',
+        })}, в ${event.place}\n\n${event.description}`,
+      },
+      { reply_markup: oneEventKeyboard(event, ctx) }
+    )
+  })
 
   bot.callbackQuery(['deleteEvent', 'yes', 'no'], deleteEvent)
 
