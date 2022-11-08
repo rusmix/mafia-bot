@@ -52,6 +52,7 @@ async function runApp() {
   // Setup bot command
   await bot.api.setMyCommands([
     { command: 'afisha', description: 'Посмотреть мероприятия' },
+    { command: 'start', description: 'Продолжить регистрацию' },
     { command: 'profile', description: 'Посмотреть свой профиль' },
   ])
   console.log('The bot commands are set')
