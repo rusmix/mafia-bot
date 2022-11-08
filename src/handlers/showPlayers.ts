@@ -46,20 +46,22 @@ export default async function showPlayers(ctx: Context) {
 
   if (players.length < 10) {
     for (let i = 1; i < players.length; i++) {
-      media.push({
-        type: 'photo',
-        media: `${players[i].user.photoId}`,
-      })
+      if (players[i].user.photoId)
+        media.push({
+          type: 'photo',
+          media: `${players[i].user.photoId}`,
+        })
     }
     console.log(media)
     await ctx.deleteMessage()
     await bot.api.sendMediaGroup(ctx.from.id, media)
   } else {
     for (let i = 1; i < players.length; i++) {
-      media.push({
-        type: 'photo',
-        media: `${players[i].user.photoId}`,
-      })
+      if (players[i].user.photoId)
+        media.push({
+          type: 'photo',
+          media: `${players[i].user.photoId}`,
+        })
       if (i % 9 === 0) {
         await bot.api.sendMediaGroup(ctx.from.id, media)
         media = []
