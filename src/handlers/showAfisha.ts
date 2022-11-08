@@ -11,16 +11,16 @@ export default async function showAfisha(ctx: Context) {
   //   (potentialEvent) =>
   //     Object.keys(testEvent).some((key) => potentialEvent[key] !== undefined)
   // )
-  let events = await EventModel.getActualEvents()
-  await Promise.all(
-    events.map(async (el) => {
-      if (+new Date() - +new Date(el.date) > 0) {
-        el.isActual = false
-        await el.save()
-      }
-    })
-  )
-  events = await EventModel.getActualEvents()
+  const events = await EventModel.getActualEvents()
+  // await Promise.all(
+  //   events.map(async (el) => {
+  //     if (+new Date() - +new Date(el.date) > 2 * 24 * 60 * 60 * 1000) {
+  //       el.isActual = false
+  //       await el.save()
+  //     }
+  //   })
+  // )
+  // events = await EventModel.getActualEvents()
 
   // console.log(events)
   if (events.length === 0)

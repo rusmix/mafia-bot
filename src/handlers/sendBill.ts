@@ -31,7 +31,7 @@ export default async function sendBill(ctx: Context) {
     ctx.session.userId
   }-${new Date().getHours()}:${new Date().getMinutes()}`
 
-  const lifetime = qiwiApi.getLifetimeByDay(2)
+  const lifetime = qiwiApi.getLifetimeByDay(31)
   ctx.session.billId = billId
 
   console.log(billId)
@@ -46,7 +46,7 @@ export default async function sendBill(ctx: Context) {
   qiwiApi.createBill(billId, fields).then(async (data) => {
     console.log(data)
     return await ctx.reply(
-      'Места забронированы! При оплате через бота, Вам начисляются бонусные баллы! Ссылка активна в течение 2 дней.',
+      'Места забронированы! При оплате через бота, Вам начисляются бонусные баллы! Оплата зачислится в течение 15 минут.',
       {
         reply_markup: payKeyboard(data.payUrl as string),
       }
@@ -67,7 +67,9 @@ export default async function sendBill(ctx: Context) {
         console.log(data)
         if (data.status.value === 'PAID') {
           clearInterval(checkBill)
-          await ctx.reply(`Успешно оплачено! Ждём Вас в ${event.place}!`)
+          await ctx.reply(
+            `Успешно оплачено, баллы начислены! Ждём Вас в ${event.place}!`
+          )
           user.balance += ctx.session.currentBonuses
           user.currentBonuses = ctx.session.currentBonuses
           ctx.session.currentBonuses = 0
@@ -77,7 +79,7 @@ export default async function sendBill(ctx: Context) {
           await user.save()
           delete ctx.session.billId
         }
-        if (+new Date() - startTime > 2 * 24 * 60 * 60 * 1000) {
+        if (+new Date() - +new Date(event.date) > 2 * 24 * 60 * 60 * 1000) {
           clearInterval(checkBill)
           //   await ctx.reply(
           //     'Вы не успели оплатить счёт! Попробуйте забронировать ещё раз.'
@@ -97,7 +99,7 @@ export default async function sendBill(ctx: Context) {
         }
       })
     },
-    60 * 1000,
+    13 * 60 * 1000,
     billId
   )
 }
