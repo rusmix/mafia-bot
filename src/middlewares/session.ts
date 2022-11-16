@@ -26,6 +26,7 @@ export interface SessionData {
   currentAmountOfPeople?: number
   adminEditing?: boolean
   billId?: string
+  isRegistred?: boolean
   admin: { state: adminState; eventTitle?: string }
   state: userState
 }

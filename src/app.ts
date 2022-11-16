@@ -39,6 +39,8 @@ import editEvent, {
 import deleteEvent from './handlers/admin/deleteEvent'
 import { EventModel } from './models/Event'
 import cancelEventRegistration from './handlers/cancelEventRegistration'
+import changeProfile from './handlers/changeProfile'
+import { writeOffBonuses } from './handlers/admin/writeOffBonuses'
 async function runApp() {
   console.log('Starting app...')
   // Mongo
@@ -82,6 +84,7 @@ async function runApp() {
   })
   // Commands
   bot.command('start', start)
+  bot.command('writeoffbonuses', writeOffBonuses)
   bot.command('afisha', showAfisha)
   bot.command('profile', showProfile)
   bot.command('getadmin22', getAdmin)
@@ -171,6 +174,11 @@ async function runApp() {
   bot.callbackQuery('editEvent', async (ctx: Context) => {
     if (ctx.dbuser.isAdmin) return await editEvent(ctx)
   })
+
+  bot.callbackQuery(
+    ['changePhotoProfile', 'changeNameProfile', 'changePhoneProfile'],
+    changeProfile
+  )
 
   bot.callbackQuery(
     [

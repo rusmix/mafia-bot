@@ -30,10 +30,15 @@ export default async function showPlayers(ctx: Context) {
         username = players[i].user.name.link(
           `t.me/${players[i].user.usernameTg}`
         )
-      } else username = players[i].user.name
-      text += `${i + 1}) ${username} + ${players[i].guests} чел. ${
-        players[i].user.phone
-      }\n`
+      } else {
+        if (players[i].user?.name) username = players[i].user.name
+      }
+      if (players[i].user.phone)
+        text += `${i + 1}) ${username} + ${players[i].guests} чел. ${
+          players[i].user.phone
+        }\n`
+      if (!players[i].user.phone)
+        text += `${i + 1}) ${username} + ${players[i].guests} чел.\n`
     }
   }
 

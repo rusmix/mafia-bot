@@ -11,14 +11,20 @@ export default async function registration(ctx: Context) {
       if (!ctx.message?.text) await ctx.reply('Отправьте имя!')
       user.name = ctx.message.text
       await user.save()
-      await ctx.reply('Теперь нажмите на кнопку для отправки телефона👇🏼', {
-        reply_markup: {
-          keyboard: phoneKeyboard.build(),
-          resize_keyboard: true,
-          one_time_keyboard: true,
-        },
-      })
       ctx.session.state = userState.sendPhone
+
+      if (ctx.session.isRegistred) {
+        await ctx.reply('Имя сохранёно')
+        ctx.session.state = userState.default
+      } else
+        await ctx.reply('Теперь нажмите на кнопку для отправки телефона👇🏼', {
+          reply_markup: {
+            keyboard: phoneKeyboard.build(),
+            resize_keyboard: true,
+            one_time_keyboard: true,
+          },
+        })
+
       break
     case userState.sendPhone:
       // eslint-disable-next-line no-case-declarations
@@ -28,7 +34,10 @@ export default async function registration(ctx: Context) {
         user.phone = message.contact.phone_number
         ctx.session.state = userState.sendPhoto
         await user.save()
-        await ctx.reply('Осталось отправить фотографию!')
+        if (ctx.session.isRegistred) {
+          await ctx.reply('Телефон сохранён')
+          ctx.session.state = userState.default
+        } else await ctx.reply('Осталось отправить фотографию!')
       } else {
         await ctx.reply('Отправьте номер телефона, нажмите на кнопку ниже 👇🏼', {
           reply_markup: {
@@ -49,9 +58,13 @@ export default async function registration(ctx: Context) {
       user.photoId = photo
       await user.save()
       ctx.session.state = userState.default
-      await ctx.reply(
-        'Всё, регистрация завершена 🔥\nНажми "Афиша", чтобы посмотреть запланированные игры'
-      )
+      if (ctx.session.isRegistred) {
+        ctx.session.state = userState.default
+        await ctx.reply('Фото сохранено🔥')
+      } else
+        await ctx.reply(
+          'Всё, регистрация завершена 🔥\nНажми "Афиша", чтобы посмотреть запланированные игры'
+        )
       break
   }
 }

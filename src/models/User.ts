@@ -26,7 +26,7 @@ export class User extends FindOrCreate {
   @prop({ index: true })
   usernameTg: string
 
-  @prop({})
+  @prop({ default: 'кто-то' })
   name: string
 
   @prop({})
@@ -50,7 +50,7 @@ export class User extends FindOrCreate {
   @prop({ default: 0 })
   currentBonuses?: number
 
-  @prop({})
+  @prop({ default: 'какой-то', index: true })
   phone: string
 
   @prop({})

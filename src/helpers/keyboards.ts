@@ -116,6 +116,13 @@ export const yesOrNoKeyboard = new InlineKeyboard()
   .text('ДА', 'yes')
   .text('НЕТ', 'no')
 
+export const editProfileKeyboard = new InlineKeyboard()
+  .text('Изменить фото', 'changePhotoProfile')
+  .row()
+  .text('Изменить имя', 'changeNameProfile')
+  .row()
+  .text('Изменить номер телефона', 'changePhoneProfile')
+
 export const editEventKeyboard = new InlineKeyboard()
   .text('Поменять заголовок', 'changeTitle')
   .row()
