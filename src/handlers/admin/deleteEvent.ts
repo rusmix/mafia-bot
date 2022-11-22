@@ -11,9 +11,16 @@ import { EventModel } from '@/models/Event'
 import { oneEventHandler } from './OneEventHandler'
 
 export default async function editEvent(ctx: Context) {
-  const event = await EventModel.findOne({ title: ctx.session.currentTitle })
+  const event = await EventModel.findOne({
+    title: ctx.session.currentTitle,
+    isActual: true,
+  })
+
+  if (!event) return await ctx.reply('Событие уже удалено.')
+
   if (ctx.match === 'yes') {
-    await EventModel.deleteOne({ title: ctx.session.currentTitle })
+    event.isActual = false
+    await event.save()
     return await ctx.editMessageMedia({
       type: 'photo',
       media: `${event.photoId}`,

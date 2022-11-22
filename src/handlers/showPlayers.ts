@@ -42,12 +42,21 @@ export default async function showPlayers(ctx: Context) {
     }
   }
 
-  media.push({
-    type: 'photo',
-    media: `${players[0].user.photoId}`,
-    caption: text,
-    parse_mode: 'HTML',
-  })
+  if (players[0].user.photoId) {
+    media.push({
+      type: 'photo',
+      media: `${players[0].user.photoId}`,
+      caption: text,
+      parse_mode: 'HTML',
+    })
+  } else {
+    media.push({
+      type: 'photo',
+      media: `AgACAgIAAxkBAAIEtWN0_h3QGycHDx1Coj6SQBtJ0XAYAAJywjEbSGipS6UqOgg2OOyVAQADAgADeAADKwQ`,
+      caption: text,
+      parse_mode: 'HTML',
+    })
+  }
 
   if (players.length < 10) {
     for (let i = 1; i < players.length; i++) {
