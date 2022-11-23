@@ -10,10 +10,9 @@ import Context from '@/models/Context';
 import { EventModel } from '@/models/Event';
 import { UserModel } from '@/models/User';
 
-export async function writeOffBonuses(ctx: Context) {
+export async function banUser(ctx: Context) {
   if (ctx.dbuser.isAdmin) {
     let phone = ctx.message.text.split(' ')[1];
-    const amount = ctx.message.text.split(' ')[2];
 
     if (phone.startsWith('+')) phone = phone.slice(1);
 
@@ -22,14 +21,25 @@ export async function writeOffBonuses(ctx: Context) {
       return await ctx.reply(
         'Пользователь не найден, попробуйте проверить телефон. Он должен быть в формате +79991233213'
       );
-    if (isNaN(Number(amount)))
-      return await ctx.reply('Неправильно введёно количество бонусов');
-    if (user.balance < Number(amount))
-      return await ctx.reply('Недостаточно бонусов на балансе');
-    user.balance -= Number(amount);
+
+    user.isBanned = true;
     await user.save();
-    await ctx.reply(
-      `Бонусы списаны успешно! Остаток на счёте: ${user.balance}`
+
+    let events = await EventModel.find({ isActual: true });
+    events = events.filter((ev) =>
+      ev.players.find((player) => player.user.id === user.id)
     );
+    events.map((ev) => {
+      const player =
+        ev.players[
+          ev.players.findIndex((player) => player.user.id === user.id)
+        ];
+      ev.amountOfPlayers -= player.guests + 1;
+      ev.players.splice(
+        ev.players.findIndex((player) => player.user.id === user.id),
+        1
+      );
+    });
+    await Promise.all(events.map(async (ev) => await ev.save()));
   }
 }

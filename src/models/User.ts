@@ -1,15 +1,15 @@
-import * as findorcreate from 'mongoose-findorcreate'
+import * as findorcreate from 'mongoose-findorcreate';
 import {
   DocumentType,
   getModelForClass,
   plugin,
   prop,
-} from '@typegoose/typegoose'
-import { FindOrCreate } from '@typegoose/typegoose/lib/defaultClasses'
+} from '@typegoose/typegoose';
+import { FindOrCreate } from '@typegoose/typegoose/lib/defaultClasses';
 
 interface Stats {
-  gamesTotal: number
-  pointsTotal: number
+  gamesTotal: number;
+  pointsTotal: number;
 }
 
 export enum State {
@@ -21,49 +21,52 @@ export enum State {
 @plugin(findorcreate)
 export class User extends FindOrCreate {
   @prop({ required: true, index: true, unique: true })
-  id: number
+  id: number;
 
   @prop({ index: true })
-  usernameTg: string
+  usernameTg: string;
 
   @prop({ default: 'кто-то' })
-  name: string
+  name: string;
 
   @prop({})
-  gamename: string
+  gamename: string;
 
   @prop({ required: true, default: 'ru' })
-  language: string
+  language: string;
 
   @prop({ default: { gamesTotal: 0, pointsTotal: 0 } })
-  thisMonthStats: Stats
+  thisMonthStats: Stats;
 
   @prop({ default: { gamesTotal: 0, pointsTotal: 0 } })
-  thisYearStats: Stats
+  thisYearStats: Stats;
 
   @prop({})
-  club: string
+  club: string;
 
   @prop({ default: 0 })
-  balance: number
+  balance: number;
 
   @prop({ default: 0 })
-  currentBonuses?: number
+  currentBonuses?: number;
 
   @prop({ default: 'какой-то', index: true })
-  phone: string
+  phone: string;
 
   @prop({})
-  photoId: string
+  photoId: string;
 
   @prop({ index: true, default: false })
-  isSentNewEvent: boolean
+  isSentNewEvent: boolean;
 
   @prop({ index: true, required: true, default: false })
-  isAdmin: boolean
+  isAdmin: boolean;
 
   @prop({ default: true })
-  isActive: boolean
+  isActive: boolean;
+
+  @prop({ default: false })
+  isBanned: boolean;
   //   public static async doSomething(this: DocumentType<User>, id: number) {
   //     this.id = id
   //     await this.save()
@@ -72,4 +75,4 @@ export class User extends FindOrCreate {
 
 export const UserModel = getModelForClass(User, {
   schemaOptions: { timestamps: true },
-})
+});
