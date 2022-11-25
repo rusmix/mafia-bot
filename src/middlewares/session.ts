@@ -1,5 +1,5 @@
-import { SessionFlavor } from 'grammy'
-import Context from '@/models/Context'
+import { SessionFlavor } from 'grammy';
+import Context from '@/models/Context';
 
 export enum adminState {
   insertDate = 'insertDate',
@@ -20,15 +20,15 @@ export enum userState {
 }
 
 export interface SessionData {
-  userId: number
-  currentTitle?: string
-  currentBonuses?: number
-  currentAmountOfPeople?: number
-  adminEditing?: boolean
-  billId?: string
-  isRegistred?: boolean
-  admin: { state: adminState; eventTitle?: string }
-  state: userState
+  userId: number;
+  currentTitle?: string;
+  currentBonuses?: number;
+  currentAmountOfPeople?: number;
+  adminEditing?: boolean;
+  billId?: string;
+  isRegistred?: boolean;
+  admin: { state: adminState; eventTitle?: string };
+  state: userState;
 }
 
-export type BotContext = Context & SessionFlavor<SessionData>
+export type BotContext = Context & SessionFlavor<SessionData>;

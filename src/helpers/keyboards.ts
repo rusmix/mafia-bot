@@ -1,34 +1,34 @@
-import { DocumentType } from '@typegoose/typegoose'
-import { Event, EventModel } from '@/models/Event'
-import { InlineKeyboard, Keyboard } from 'grammy'
-import Context from '@/models/Context'
+import { DocumentType } from '@typegoose/typegoose';
+import { Event, EventModel } from '@/models/Event';
+import { InlineKeyboard, Keyboard } from 'grammy';
+import Context from '@/models/Context';
 
 export const phoneKeyboard = new Keyboard().requestContact(
   'Отправить номер телефона'
-)
+);
 
 export const navigationKeyboard = new InlineKeyboard()
   .text('◀️', 'left')
-  .text('▶️', 'right')
+  .text('▶️', 'right');
 
-export const navigationKeyboardRight = new InlineKeyboard().text('▶️', 'right')
+export const navigationKeyboardRight = new InlineKeyboard().text('▶️', 'right');
 
-export const navigationKeyboardLeft = new InlineKeyboard().text('◀️', 'left')
+export const navigationKeyboardLeft = new InlineKeyboard().text('◀️', 'left');
 
 export const adminKeyboard = new InlineKeyboard().text(
   'Добавить ивент',
   'addEvent'
-)
+);
 
-export const numbers = ['1', '2', '3', '4', '5', '6']
+export const numbers = ['1', '2', '3', '4', '5', '6'];
 
 export const numbersKeyboard = (amount: number) => {
-  let keyboard = new InlineKeyboard().text('Я один', '1')
+  let keyboard = new InlineKeyboard().text('Я один', '1');
   if (amount < 6) {
     for (let i = 2; i <= amount; i++) {
-      keyboard = keyboard.text(`+ ${i - 1}`, `${i}`)
+      keyboard = keyboard.text(`+ ${i - 1}`, `${i}`);
     }
-    return keyboard
+    return keyboard;
   }
   return keyboard
     .text('+ 1', '2')
@@ -36,24 +36,24 @@ export const numbersKeyboard = (amount: number) => {
     .row()
     .text('+ 3', '4')
     .text('+ 4', '5')
-    .text('+ 5', '6')
-}
+    .text('+ 5', '6');
+};
 
 export const eventsKeyboard = async () => {
   // let res = await EventModel.find({ isActual: true }) // title date (day of week) place
 
-  const res = await EventModel.getActualEvents()
+  const res = await EventModel.getActualEvents();
 
   // console.log(
   //   res,
   //   '\n_________________________________\n_________________________________\n'
   // )
   // console.log(res)
-  let keyboard = new InlineKeyboard()
+  let keyboard = new InlineKeyboard();
 
   res.sort(function (a, b) {
-    return +new Date(a.date) - +new Date(b.date)
-  })
+    return +new Date(a.date) - +new Date(b.date);
+  });
 
   res.map((el) => {
     keyboard = keyboard
@@ -68,39 +68,39 @@ export const eventsKeyboard = async () => {
         })}, в ${el.place}`,
         `${el.title}`
       )
-      .row()
-  })
-  return keyboard
-}
+      .row();
+  });
+  return keyboard;
+};
 
 export const oneEventKeyboard = (event: DocumentType<Event>, ctx: Context) => {
-  const amount = event.amountOfPlayers
-  const maxAmount = event.maxPlayers
+  const amount = event.amountOfPlayers;
+  const maxAmount = event.maxPlayers;
 
   let keyboard = new InlineKeyboard()
     .text('◀️', 'left')
     .text('▶️', 'right')
     .row()
-    .text(`Игроки (${amount}/${maxAmount})`, 'showPlayers')
+    .text(`Игроки (${amount}/${maxAmount})`, 'showPlayers');
 
   const player = event.players.find((el) => {
-    return el.user.id === ctx.dbuser.id
-  })
+    return el.user.id === ctx.dbuser.id;
+  });
 
   if (amount < maxAmount && !player)
-    keyboard = keyboard.row().text(`Записаться`, 'register')
+    keyboard = keyboard.row().text(`Записаться`, 'register');
 
   if (player) {
-    keyboard = keyboard.row().text(`Отменить бронь`, 'unregister')
+    keyboard = keyboard.row().text(`Отменить бронь`, 'unregister');
 
     if (event.maxPlayers - event.amountOfPlayers > 0)
-      keyboard = keyboard.row().text('Добавить 1 друга', 'addFriend')
+      keyboard = keyboard.row().text('Добавить 1 друга', 'addFriend');
     if (player.guests > 0)
-      keyboard = keyboard.row().text('Удалить 1 друга', 'deleteFriend')
+      keyboard = keyboard.row().text('Удалить 1 друга', 'deleteFriend');
   }
 
-  return keyboard
-}
+  return keyboard;
+};
 
 export const oneEventAdminKeyboard = new InlineKeyboard()
   .text('◀️', 'left')
@@ -110,18 +110,18 @@ export const oneEventAdminKeyboard = new InlineKeyboard()
   .row()
   .text('Редактировать событие', 'editEvent')
   .row()
-  .text('Игроки', 'showPlayers')
+  .text('Игроки', 'showPlayers');
 
 export const yesOrNoKeyboard = new InlineKeyboard()
   .text('ДА', 'yes')
-  .text('НЕТ', 'no')
+  .text('НЕТ', 'no');
 
 export const editProfileKeyboard = new InlineKeyboard()
   .text('Изменить фото', 'changePhotoProfile')
   .row()
   .text('Изменить имя', 'changeNameProfile')
   .row()
-  .text('Изменить номер телефона', 'changePhoneProfile')
+  .text('Изменить номер телефона', 'changePhoneProfile');
 
 export const editEventKeyboard = new InlineKeyboard()
   .text('Поменять заголовок', 'changeTitle')
@@ -133,11 +133,13 @@ export const editEventKeyboard = new InlineKeyboard()
   .text('Поменять описание', 'changeDescription')
   .row()
   .text('Поменять фотографию', 'changePhoto')
+  .row()
+  .text('Поменять лимит игроков', 'changePlayerLimit');
 
 export const payKeyboard = (url: string) => {
-  const keyboard = new InlineKeyboard().url('Оплата QIWI', url)
-  return keyboard
-}
+  const keyboard = new InlineKeyboard().url('Оплата QIWI', url);
+  return keyboard;
+};
 
 export const webAppKeyboard = {
   inline_keyboard: [
@@ -149,4 +151,4 @@ export const webAppKeyboard = {
       },
     ],
   ],
-}
+};

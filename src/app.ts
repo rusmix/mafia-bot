@@ -189,6 +189,7 @@ async function runApp() {
       'changeDescription',
       'changePhoto',
       'changeTitle',
+      'changePlayerLimit',
     ],
     editEventHandler
   );
