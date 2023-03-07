@@ -17,6 +17,7 @@ export enum userState {
   sendName = 'sendName',
   sendPhone = 'sendPhone',
   sendPhoto = 'sendPhoto',
+  registrating = 'registrating',
 }
 
 export interface SessionData {

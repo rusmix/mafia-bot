@@ -20,8 +20,7 @@ export default async function editEvent(ctx: Context) {
   if (!event) return await ctx.reply('Событие уже удалено.');
 
   if (ctx.match === 'yes') {
-    event.isActual = false;
-    await event.save();
+    await event.deleteOne({ title: ctx.session.currentTitle, isActual: true });
     await ctx.editMessageMedia({
       type: 'photo',
       media: `${event.photoId}`,

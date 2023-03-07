@@ -65,7 +65,7 @@ export const eventsKeyboard = async () => {
           weekday: 'short',
           hour: 'numeric',
           minute: 'numeric',
-        })}, в ${el.place}`,
+        })}`,
         `${el.title}`
       )
       .row();

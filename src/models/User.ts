@@ -67,6 +67,9 @@ export class User extends FindOrCreate {
 
   @prop({ default: false })
   isBanned: boolean;
+
+  @prop({ default: false })
+  isRegistered: boolean;
   //   public static async doSomething(this: DocumentType<User>, id: number) {
   //     this.id = id
   //     await this.save()
