@@ -97,8 +97,8 @@ export default async function addEvent(ctx: Context) {
       ctx.session.admin.state = adminState.default;
       console.log(res);
       await ctx.reply('Успешно добавлено');
+      await void setCallback();
       await notifyAllUsers(ctx);
-      void setCallback();
       break;
   }
 }

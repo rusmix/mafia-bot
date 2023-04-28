@@ -6,6 +6,7 @@ import {
   prop,
 } from '@typegoose/typegoose';
 import { FindOrCreate } from '@typegoose/typegoose/lib/defaultClasses';
+import { ObjectId } from 'mongoose';
 
 interface Stats {
   gamesTotal: number;
@@ -20,6 +21,7 @@ export enum State {
 
 @plugin(findorcreate)
 export class User extends FindOrCreate {
+  _id: ObjectId;
   @prop({ required: true, index: true, unique: true })
   id: number;
 

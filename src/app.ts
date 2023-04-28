@@ -42,6 +42,7 @@ import cancelEventRegistration from './handlers/cancelEventRegistration';
 import changeProfile from './handlers/changeProfile';
 import { writeOffBonuses } from './handlers/admin/writeOffBonuses';
 import { banUser } from './handlers/admin/banUser';
+import initiateGame from './handlers/admin/initiateGame';
 async function runApp() {
   console.log('Starting app...');
   // Mongo
@@ -193,6 +194,8 @@ async function runApp() {
     ],
     editEventHandler
   );
+
+  bot.callbackQuery('initiateGame', initiateGame);
 
   bot.callbackQuery(['left', 'right'], async (ctx: Context) => {
     if (ctx.dbuser.isAdmin) {

@@ -2,6 +2,7 @@ import { EventModel } from '@/models/Event';
 import { eventsKeyboard } from '@/helpers/keyboards';
 import Context from '@/models/Context';
 import testEvent from '@/models/Event';
+import setCallbackAfisha from '@/helpers/setCallbackAfisha';
 
 export default async function showAfisha(ctx: Context) {
   // await ctx.reply('Доступные для записи мероприятия!', {
@@ -23,6 +24,9 @@ export default async function showAfisha(ctx: Context) {
   // events = await EventModel.getActualEvents()
 
   // console.log(events)
+  if (ctx.dbuser.isAdmin) {
+    await void setCallbackAfisha();
+  }
   if (events.length === 0)
     return await ctx.reply(
       'На данный момент никаких событий не запланировано!'

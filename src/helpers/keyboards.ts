@@ -2,6 +2,7 @@ import { DocumentType } from '@typegoose/typegoose';
 import { Event, EventModel } from '@/models/Event';
 import { InlineKeyboard, Keyboard } from 'grammy';
 import Context from '@/models/Context';
+import { ObjectId } from 'mongoose';
 
 export const phoneKeyboard = new Keyboard().requestContact(
   'Отправить номер телефона'
@@ -19,6 +20,10 @@ export const adminKeyboard = new InlineKeyboard().text(
   'Добавить ивент',
   'addEvent'
 );
+
+export const startGameKeyboard = (id: string | ObjectId): InlineKeyboard => {
+  return new InlineKeyboard().url('Старт', `mysite.ru/${id}`);
+};
 
 export const numbers = ['1', '2', '3', '4', '5', '6'];
 
@@ -110,7 +115,9 @@ export const oneEventAdminKeyboard = new InlineKeyboard()
   .row()
   .text('Редактировать событие', 'editEvent')
   .row()
-  .text('Игроки', 'showPlayers');
+  .text('Игроки', 'showPlayers')
+  .row()
+  .text('Начать игру', 'initiateGame');
 
 export const yesOrNoKeyboard = new InlineKeyboard()
   .text('ДА', 'yes')

@@ -37,7 +37,7 @@ export class Event extends FindOrCreate {
   @prop({})
   maxPlayers: number;
 
-  @prop({ index: true, default: false })
+  @prop({ index: true, default: true })
   isActual: boolean;
 
   public static async getActualEvents(): Promise<DocumentType<Event>[]> {
