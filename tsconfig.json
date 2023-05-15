@@ -12,7 +12,8 @@
       "@/*": ["*"]
     },
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "jsx": "react"
   },
   "include": ["src/**/*"]
 }
