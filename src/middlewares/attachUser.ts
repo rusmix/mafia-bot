@@ -6,7 +6,11 @@ import { userState } from './session';
 import registration from '@/handlers/registration';
 
 export default async function attachUser(ctx: Context, next: NextFunction) {
-  const { doc } = await UserModel.findOrCreate({ id: ctx.from.id }); //функция для прикрепления к ctx dbuser
+  let doc = await UserModel.findOne({ id: ctx.from.id }); //функция для прикрепления к ctx dbuser
+  console.log('current user is ', doc);
+  if (!doc) {
+    doc = await UserModel.create({ id: ctx.from.id });
+  }
   ctx.dbuser = doc;
 
   if (ctx.dbuser.isBanned) return; // функция бана

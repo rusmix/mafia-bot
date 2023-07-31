@@ -43,11 +43,13 @@ import changeProfile from './handlers/changeProfile';
 import { writeOffBonuses } from './handlers/admin/writeOffBonuses';
 import { banUser } from './handlers/admin/banUser';
 import initiateGame from './handlers/admin/initiateGame';
+import { startWebServer } from './backend/app';
 async function runApp() {
   console.log('Starting app...');
   // Mongo
   await startMongo();
   console.log('Mongo connected');
+  await startWebServer();
   // for deleting answers during tests
   // await AnswerModel.deleteMany()
   // await UserModel.deleteMany()

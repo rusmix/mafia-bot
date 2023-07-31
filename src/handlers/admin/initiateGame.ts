@@ -1,6 +1,6 @@
 import { EventModel } from '@/models/Event';
 import Context from '@/models/Context';
-import { GameModel, IPlayer } from '@/models/Game';
+import { GameModel, IPlayer, Status, Roles } from '@/models/Game';
 import { IPluginsArray } from '@typegoose/typegoose/lib/types';
 import { startGameKeyboard } from '@/helpers/keyboards';
 
@@ -14,9 +14,10 @@ export default async function initiateGame(ctx: Context) {
     game.players[i] = {
       id: el.user._id,
       name: el.user.name,
-      role: null,
+      role: Roles.default,
       points: 0,
-      status: null,
+      status: Status.default,
+      votedTo: null,
     };
   });
   console.log(game);
@@ -28,10 +29,12 @@ export default async function initiateGame(ctx: Context) {
       console.log('Game saved successfully');
     }
   });
-  await ctx.editMessageReplyMarkup();
-
-  await ctx.reply('тут ссылка на сайт', {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  await ctx.editMessageReplyMarkup({
     reply_markup: startGameKeyboard(game._id),
   });
+
+  // await ctx.reply('тут ссылка на сайт', {
+  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
+  // });
 }

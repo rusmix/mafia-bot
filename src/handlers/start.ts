@@ -8,6 +8,7 @@ import showAfisha from './showAfisha';
 
 export default async function start(ctx: Context) {
   const user = ctx.dbuser;
+  console.log(user);
   user.isActive = true;
   await user.save();
   if (

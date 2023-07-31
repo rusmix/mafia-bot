@@ -1,7 +1,6 @@
 import { EventModel } from '@/models/Event';
 import { eventsKeyboard } from '@/helpers/keyboards';
 import Context from '@/models/Context';
-import testEvent from '@/models/Event';
 import setCallbackAfisha from '@/helpers/setCallbackAfisha';
 
 export default async function showAfisha(ctx: Context) {

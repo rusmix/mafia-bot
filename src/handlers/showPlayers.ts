@@ -2,13 +2,22 @@ import bot from '@/helpers/bot';
 import { eventsKeyboard } from '@/helpers/keyboards';
 import Context from '@/models/Context';
 import { EventModel } from '@/models/Event';
+import { UserModel } from '@/models/User';
 
 export default async function showPlayers(ctx: Context) {
   let media = [];
   console.log(ctx.session.currentTitle);
   const event = await EventModel.findOne({ title: ctx.session.currentTitle });
 
-  const players = event.players;
+  const playerUserIds = event.players.map((player) => player.user);
+  const guests = event.players.map((player) => player.guests);
+
+  const users = await UserModel.find({ _id: { $in: playerUserIds } }).lean();
+
+  const players = users.map((user, index) => {
+    return { user: user, guests: guests[index] };
+  });
+
   console.log('players!!!!!!!!!', players);
   if (players.length === 0) return await ctx.answerCallbackQuery();
   let text = 'Игроки:\n';
@@ -33,11 +42,11 @@ export default async function showPlayers(ctx: Context) {
       } else {
         if (players[i].user?.name) username = players[i].user.name;
       }
-      if (players[i].user.phone)
+      if (players[i].user?.phone)
         text += `${i + 1}) ${username} + ${players[i].guests} чел. ${
-          players[i].user.phone
+          players[i].user?.phone
         }\n`;
-      if (!players[i].user.phone)
+      if (!players[i].user?.phone)
         text += `${i + 1}) ${username} + ${players[i].guests} чел.\n`;
     }
   }

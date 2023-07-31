@@ -1,13 +1,5 @@
-import * as findorcreate from 'mongoose-findorcreate';
-import {
-  DocumentType,
-  getModelForClass,
-  plugin,
-  prop,
-} from '@typegoose/typegoose';
-import { FindOrCreate } from '@typegoose/typegoose/lib/defaultClasses';
-import { ObjectId } from 'mongoose';
-import { User } from './User';
+import mongoose, { Document, Schema, Types, Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 export enum Roles {
   yaponchik = 'Япончик',
@@ -23,6 +15,7 @@ export enum Roles {
   holyman = 'Священник',
   zatikator = 'Затыкатор',
   citizen = 'Мирный житель',
+  default = 'default',
 }
 
 enum Phase {
@@ -34,62 +27,54 @@ export enum Status {
   alive = 'alive',
   dead = 'dead',
   inPrison = 'inPrison',
+  default = 'default',
 }
 
 export interface IPlayer {
-  id: ObjectId | string;
+  id: ObjectId; //Schema.Types.ObjectId;
   name: string;
   role: Roles;
   points: number;
   status: Status;
+  votedTo: Types.ObjectId;
 }
 
-@plugin(findorcreate)
-export class Game extends FindOrCreate {
-  @prop({ index: true, default: true })
+export interface IGame extends Document {
   isActual: boolean;
-
-  @prop()
   players: IPlayer[];
-  @prop()
   mafiaPeople: number;
-  @prop()
   citizen: number;
-  @prop()
   phase: Phase;
-  @prop({ default: 0 })
   nightCount: number;
-  @prop()
-  mafiaVoted: ObjectId;
-  @prop()
-  sniperVoted: ObjectId;
-  @prop()
-  doctorVoted: ObjectId;
-  @prop()
-  angelaVoted: ObjectId;
-  @prop()
-  felixVoted: ObjectId;
-  @prop()
-  shtirlitzVoted: ObjectId;
-  @prop()
-  saper: ObjectId[];
-  @prop()
+  saper: Types.ObjectId[];
   saperKills: number;
-  @prop({ default: 4 })
   immortalCount: number;
-  @prop()
-  zatikatorVoted: ObjectId;
-  @prop({ default: 5 }) //превращается с 5 выстрела
   oborotenCount: number;
-
-  //   public static as;ync getActualEvents(): Promise<DocumentType<Game>[]> {
-  // const events = (await EventModel.find({ isActual: true })).filter(
-  //   (potentialEvent) =>
-  //     !Object.keys(testEvent).some((key) => potentialEvent[key] === undefined)
-  // )
-  //   }
 }
 
-export const GameModel = getModelForClass(Game, {
-  schemaOptions: { timestamps: true },
-});
+const gameSchema = new Schema<IGame>(
+  {
+    isActual: { type: Boolean, index: true, default: true },
+    players: [
+      {
+        id: { type: Schema.Types.ObjectId },
+        name: String,
+        role: { type: String, enum: Roles },
+        points: Number,
+        status: { type: String, enum: Status },
+        votedTo: { type: Schema.Types.ObjectId },
+      },
+    ],
+    mafiaPeople: Number,
+    citizen: Number,
+    phase: { type: String, enum: Phase },
+    nightCount: { type: Number, default: 0 },
+    saper: [{ type: Schema.Types.ObjectId }],
+    saperKills: Number,
+    immortalCount: { type: Number, default: 4 },
+    oborotenCount: { type: Number, default: 5 },
+  },
+  { timestamps: true }
+);
+
+export const GameModel = mongoose.model<IGame>('games', gameSchema, 'games');

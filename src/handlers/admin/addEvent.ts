@@ -15,7 +15,7 @@ export default async function addEvent(ctx: Context) {
       break;
     case adminState.insertTitle:
       ctx.session.admin.eventTitle = ctx.message.text;
-      await EventModel.findOrCreate({ title: ctx.session.admin.eventTitle });
+      await EventModel.create({ title: ctx.session.admin.eventTitle });
 
       // eslint-disable-next-line no-case-declarations
       const date = new Date();

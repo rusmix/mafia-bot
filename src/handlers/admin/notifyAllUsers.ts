@@ -9,7 +9,7 @@ import {
 } from '@/helpers/keyboards';
 import Context from '@/models/Context';
 import { EventModel } from '@/models/Event';
-import { User, UserModel } from '@/models/User';
+import { UserModel } from '@/models/User';
 
 export default async function notifyAllUsers(ctx: Context) {
   const users = await UserModel.find({ isActive: true });

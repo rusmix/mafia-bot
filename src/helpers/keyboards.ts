@@ -1,5 +1,5 @@
 import { DocumentType } from '@typegoose/typegoose';
-import { Event, EventModel } from '@/models/Event';
+import { IEvent as Event, EventModel } from '@/models/Event';
 import { InlineKeyboard, Keyboard } from 'grammy';
 import Context from '@/models/Context';
 import { ObjectId } from 'mongoose';
@@ -22,7 +22,7 @@ export const adminKeyboard = new InlineKeyboard().text(
 );
 
 export const startGameKeyboard = (id: string | ObjectId): InlineKeyboard => {
-  return new InlineKeyboard().url('Старт', `mysite.ru/${id}`);
+  return new InlineKeyboard().url('Старт', `http://localhost:3000/start/${id}`);
 };
 
 export const numbers = ['1', '2', '3', '4', '5', '6'];
@@ -78,7 +78,7 @@ export const eventsKeyboard = async () => {
   return keyboard;
 };
 
-export const oneEventKeyboard = (event: DocumentType<Event>, ctx: Context) => {
+export const oneEventKeyboard = (event: Event, ctx: Context) => {
   const amount = event.amountOfPlayers;
   const maxAmount = event.maxPlayers;
 
@@ -89,8 +89,10 @@ export const oneEventKeyboard = (event: DocumentType<Event>, ctx: Context) => {
     .text(`Игроки (${amount}/${maxAmount})`, 'showPlayers');
 
   const player = event.players.find((el) => {
-    return el.user.id === ctx.dbuser.id;
+    console.log(el, 'DBUSER IS__', ctx.dbuser);
+    return el.user.equals(ctx.dbuser._id);
   });
+  console.log('PLAYER IS___', player);
 
   if (amount < maxAmount && !player)
     keyboard = keyboard.row().text(`Записаться`, 'register');

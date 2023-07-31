@@ -1,12 +1,5 @@
-import * as findorcreate from 'mongoose-findorcreate';
-import {
-  DocumentType,
-  getModelForClass,
-  plugin,
-  prop,
-} from '@typegoose/typegoose';
-import { FindOrCreate } from '@typegoose/typegoose/lib/defaultClasses';
-import { ObjectId } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 interface Stats {
   gamesTotal: number;
@@ -19,65 +12,49 @@ export enum State {
   photoId = 'photoId',
 }
 
-@plugin(findorcreate)
-export class User extends FindOrCreate {
-  _id: ObjectId;
-  @prop({ required: true, index: true, unique: true })
+export interface IUser extends Document {
   id: number;
-
-  @prop({ index: true })
   usernameTg: string;
-
-  @prop({ default: 'кто-то' })
   name: string;
-
-  @prop({})
   gamename: string;
-
-  @prop({ required: true, default: 'ru' })
   language: string;
-
-  @prop({ default: { gamesTotal: 0, pointsTotal: 0 } })
   thisMonthStats: Stats;
-
-  @prop({ default: { gamesTotal: 0, pointsTotal: 0 } })
   thisYearStats: Stats;
-
-  @prop({})
   club: string;
-
-  @prop({ default: 0 })
   balance: number;
-
-  @prop({ default: 0 })
   currentBonuses?: number;
-
-  @prop({ default: 'какой-то', index: true })
   phone: string;
-
-  @prop({})
   photoId: string;
-
-  @prop({ index: true, default: false })
   isSentNewEvent: boolean;
-
-  @prop({ index: true, required: true, default: false })
   isAdmin: boolean;
-
-  @prop({ default: true })
   isActive: boolean;
-
-  @prop({ default: false })
   isBanned: boolean;
-
-  @prop({ default: false })
   isRegistered: boolean;
-  //   public static async doSomething(this: DocumentType<User>, id: number) {
-  //     this.id = id
-  //     await this.save()
-  //   }
 }
 
-export const UserModel = getModelForClass(User, {
-  schemaOptions: { timestamps: true },
+const statsSchema = new Schema({
+  gamesTotal: { type: Number, default: 0 },
+  pointsTotal: { type: Number, default: 0 },
 });
+
+const userSchema = new Schema<IUser>({
+  id: { type: Number, required: true, index: true, unique: true },
+  usernameTg: { type: String, index: true },
+  name: { type: String, default: 'кто-то' },
+  gamename: String,
+  language: { type: String, required: true, default: 'ru' },
+  thisMonthStats: { type: statsSchema, default: () => ({}) },
+  thisYearStats: { type: statsSchema, default: () => ({}) },
+  club: String,
+  balance: { type: Number, default: 0 },
+  currentBonuses: Number,
+  phone: { type: String, default: 'какой-то', index: true },
+  photoId: String,
+  isSentNewEvent: { type: Boolean, index: true, default: false },
+  isAdmin: { type: Boolean, index: true, required: true, default: false },
+  isActive: { type: Boolean, default: true },
+  isBanned: { type: Boolean, default: false },
+  isRegistered: { type: Boolean, default: false },
+}, { timestamps: true });
+
+export const UserModel = mongoose.model<IUser>('users', userSchema, 'users');

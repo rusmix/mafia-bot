@@ -1,68 +1,93 @@
-import * as findorcreate from 'mongoose-findorcreate';
-import {
-  DocumentType,
-  getModelForClass,
-  plugin,
-  prop,
-} from '@typegoose/typegoose';
-import { FindOrCreate } from '@typegoose/typegoose/lib/defaultClasses';
-import { User } from './User';
+import mongoose, { Document, Schema, Model, Aggregate } from 'mongoose';
+import { IUser as User } from './User';
+import { ObjectId } from 'mongodb';
 
-@plugin(findorcreate)
-export class Event extends FindOrCreate {
-  @prop({ index: true })
+export interface IEvent extends Document {
   title: string;
-
-  @prop({})
   description: string;
-
-  @prop({})
   place: string;
-
-  @prop({})
   price: number;
-
-  @prop({})
   photoId: string;
-
-  @prop({})
   players: { user: User; guests?: number }[];
-
-  @prop({ default: 0 })
   amountOfPlayers: number;
-
-  @prop({})
   date: Date;
-
-  @prop({})
   maxPlayers: number;
-
-  @prop({ index: true, default: true })
   isActual: boolean;
-
-  public static async getActualEvents(): Promise<DocumentType<Event>[]> {
-    // const events = (await EventModel.find({ isActual: true })).filter(
-    //   (potentialEvent) =>
-    //     !Object.keys(testEvent).some((key) => potentialEvent[key] === undefined)
-    // )
-    const events = await EventModel.find({ isActual: true });
-    return events;
-  }
 }
 
-const testEvent = new Event();
-testEvent.title = 'test';
-testEvent.description = 'test';
-testEvent.place = 'test';
-testEvent.price = 1;
-testEvent.photoId = 'test';
-testEvent.players = [];
-testEvent.amountOfPlayers = 0;
-testEvent.date = new Date();
-testEvent.maxPlayers = 0;
-testEvent.isActual = false;
-export default testEvent;
+// Define an interface for static methods
+interface IEventModel extends Model<IEvent> {
+  aggregatePlayers(_id: ObjectId): Promise<IEvent>;
+  getActualEvents(): Promise<IEvent[]>;
+}
 
-export const EventModel = getModelForClass(Event, {
-  schemaOptions: { timestamps: true },
-});
+const eventSchema = new Schema<IEvent, IEventModel>(
+  {
+    title: { type: String, index: true },
+    description: String,
+    place: String,
+    price: Number,
+    photoId: String,
+    players: [
+      {
+        user: { type: ObjectId, ref: 'User' },
+        guests: Number,
+      },
+      {
+        _id: false,
+      },
+    ],
+    amountOfPlayers: { type: Number, default: 0 },
+    date: Date,
+    maxPlayers: Number,
+    isActual: { type: Boolean, index: true, default: true },
+  },
+  { timestamps: true }
+);
+
+eventSchema.statics.getActualEvents = async function (): Promise<IEvent[]> {
+  const events = await this.find({ isActual: true });
+  return events;
+};
+
+eventSchema.statics.aggregatePlayers = async function (
+  id: ObjectId
+): Promise<any> {
+  return this.aggregate([
+    { $match: { _id: id } },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'players.user',
+        foreignField: '_id',
+        as: 'userDocs'
+      }
+    },
+    { $unwind: '$userDocs' },
+    { $unwind: '$players' },
+    {
+      $addFields: {
+        'players.user': {
+          $cond: {
+            if: { $eq: ['$players.user', '$userDocs._id'] },
+            then: '$userDocs',
+            else: '$players.user'
+          }
+        }
+      }
+    },
+    {
+      $group: {
+        _id: '$_id',
+        players: { $push: '$players' },
+        // Include other fields that you want to keep
+      }
+    }
+  ]).exec();
+};
+
+export const EventModel = mongoose.model<IEvent, IEventModel>(
+  'events',
+  eventSchema,
+  'events'
+);
